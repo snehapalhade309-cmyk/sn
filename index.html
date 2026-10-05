@@ -1,1 +1,3363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>ResQAI — AI-Powered Real-Time Disaster Response System</title>
+  
+  <!-- =====================================================================
+       ResQAI: AI-Powered Real-Time Disaster Response Platform
+       Built with pure HTML5, CSS3, Vanilla JavaScript, Leaflet.js, and Mapbox
+       
+       TABLE OF CONTENTS:
+       1. Embedded Styles (CSS Design System, Glassmorphism, Responsive Grid)
+       2. Header & Sticky Navigation
+       3. Offline Mode & High-Contrast Emergency HUD Banners
+       4. Sticky 1-Tap SOS Floating Button & Countdown Modal
+       5. Section 1: Hero Banner & Animated Live Radar
+       6. Section 2: Interactive Leaflet Live Map & Evacuation Router
+       7. Section 3: AI Risk Detection & Real-Time Sensor Telemetry
+       8. Section 4: Smart Dispatch & Live SAR Fleet Tracking
+       9. Section 5: Priority Rescue Mode (Vulnerable Demographic Triage)
+       10. Section 6: Smart Alerts & Multilingual Broadcaster (EN / HI)
+       11. Section 7: Core System Architecture & Features
+       12. Section 8: Admin & EOC Analytics Dashboard (Power BI Style)
+       13. Section 9: Mobile & Offline UI with Cached Emergency Directory
+       14. Interactive Suite:
+           - 🔊 Voice Emergency Reporter (Web Speech API)
+           - 🧠 AI First-Aid Chatbot ("ResQ-Bot")
+           - ⏪ Disaster Time Machine
+           - 🔮 What-If Simulator
+           - 🛡 Area Resilience Scorecard
+           - ✅ Family Safety Check-In Board
+           - 📍 Crowd-Verified Reports System
+           - 🏠 Shelter & Resource Finder
+           - 🚁 Drone Thermal Reconnaissance Simulator
+           - 📡 Offline Mesh Network Packet Simulator
+       15. Embedded JavaScript (Complete Logic, Simulated AI, & Triage Engines)
+       16. Production API Integration Guide & How-To-Run Manual
+  ===================================================================== -->
 
+  <!-- Leaflet CSS for Interactive Geospatial Mapping -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <style>
+    /* -------------------------------------------------------------
+       1. CSS DESIGN SYSTEM & THEMING VARIABLES
+       ------------------------------------------------------------- */
+    :root {
+      --bg-dark: #060913;
+      --bg-surface: #0c1427;
+      --bg-surface-elevated: #111d38;
+      --bg-glass: rgba(12, 22, 42, 0.72);
+      --bg-glass-card: rgba(16, 28, 54, 0.65);
+      --border-subtle: rgba(0, 240, 255, 0.15);
+      --border-bright: rgba(0, 240, 255, 0.45);
+      
+      --cyan-neon: #00f0ff;
+      --cyan-glow: rgba(0, 240, 255, 0.35);
+      --blue-deep: #0066ff;
+      --red-alert: #ff2a5f;
+      --red-glow: rgba(255, 42, 95, 0.4);
+      --amber-warn: #ffaa00;
+      --amber-glow: rgba(255, 170, 0, 0.35);
+      --green-safe: #00ff88;
+      --green-glow: rgba(0, 255, 136, 0.35);
+      --purple-priority: #a855f7;
+
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --transition-smooth: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+    }
+
+    /* High Contrast Emergency Mode Override */
+    body.emergency-mode {
+      --bg-dark: #000000;
+      --bg-surface: #0a0505;
+      --bg-surface-elevated: #1a0505;
+      --bg-glass: rgba(26, 5, 5, 0.92);
+      --bg-glass-card: rgba(35, 8, 8, 0.92);
+      --border-subtle: #ff2a5f;
+      --border-bright: #ff003c;
+      --cyan-neon: #ffe600;
+      --text-main: #ffffff;
+      --text-muted: #ffcccc;
+      filter: contrast(115%);
+    }
+
+    body.large-text-mode {
+      font-size: 118%;
+    }
+
+    /* Reset & Base Setup */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-stack);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Background Light Orbs */
+    body::before {
+      content: "";
+      position: fixed;
+      top: -150px;
+      left: 10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0, 102, 255, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: -150px;
+      right: 5%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a {
+      color: var(--cyan-neon);
+      text-decoration: none;
+      transition: var(--transition-smooth);
+    }
+    a:hover {
+      text-shadow: 0 0 8px var(--cyan-neon);
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Section Headers */
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+    .section-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--border-subtle);
+      color: var(--cyan-neon);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--cyan-neon) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+    .section-subtitle {
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto;
+      font-size: 1.05rem;
+    }
+
+    /* Glassmorphism Cards */
+    .glass-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-glass);
+      transition: var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+    .glass-card:hover {
+      border-color: var(--border-bright);
+      box-shadow: 0 12px 36px rgba(0, 240, 255, 0.12);
+      transform: translateY(-3px);
+    }
+
+    /* Pulsing Alert Elements */
+    .pulse-danger {
+      animation: alertPulseRed 1.8s infinite;
+    }
+    .pulse-cyan {
+      animation: alertPulseCyan 2.2s infinite;
+    }
+    @keyframes alertPulseRed {
+      0% { box-shadow: 0 0 0 0 rgba(255, 42, 95, 0.6); }
+      70% { box-shadow: 0 0 0 14px rgba(255, 42, 95, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 42, 95, 0); }
+    }
+    @keyframes alertPulseCyan {
+      0% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.6); }
+      70% { box-shadow: 0 0 0 14px rgba(0, 240, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0); }
+    }
+
+    /* Button Styles */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 12px 22px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: var(--transition-smooth);
+      min-height: 48px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #ff2a5f 0%, #d80032 100%);
+      color: #fff;
+      box-shadow: 0 4px 20px var(--red-glow);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 6px 26px rgba(255, 42, 95, 0.7);
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid var(--border-bright);
+      color: var(--cyan-neon);
+    }
+    .btn-secondary:hover {
+      background: rgba(0, 240, 255, 0.22);
+      box-shadow: 0 0 16px var(--cyan-glow);
+      transform: translateY(-2px);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+    .btn-outline:hover {
+      border-color: var(--cyan-neon);
+      color: var(--cyan-neon);
+    }
+
+    /* -------------------------------------------------------------
+       2. TOP STATUS TICKER & MAIN NAVIGATION
+       ------------------------------------------------------------- */
+    .top-telemetry-bar {
+      background: rgba(6, 9, 19, 0.9);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 6px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+    .telemetry-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .telemetry-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green-safe);
+      box-shadow: 0 0 8px var(--green-safe);
+      animation: blink 1.4s infinite;
+    }
+    .live-dot.danger {
+      background: var(--red-alert);
+      box-shadow: 0 0 8px var(--red-alert);
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Main Navbar */
+    .navbar {
+      background: var(--bg-glass);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 31px;
+      z-index: 999;
+      padding: 12px 0;
+    }
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    .brand-logo .ai-badge {
+      background: linear-gradient(135deg, var(--cyan-neon), var(--blue-deep));
+      color: #060913;
+      font-size: 0.7rem;
+      font-weight: 900;
+      padding: 2px 7px;
+      border-radius: 6px;
+      letter-spacing: 1px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+      align-items: center;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .nav-links a:hover {
+      color: var(--cyan-neon);
+    }
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Accessibility & Emergency Toggles */
+    .toggle-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      padding: 5px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: var(--transition-smooth);
+    }
+    .toggle-pill:hover {
+      border-color: var(--cyan-neon);
+    }
+    .toggle-pill.active {
+      background: var(--red-alert);
+      color: #fff;
+      border-color: var(--red-alert);
+      box-shadow: 0 0 14px var(--red-glow);
+    }
+
+    /* Banner for Simulated Offline Mode */
+    #offline-banner {
+      display: none;
+      background: linear-gradient(90deg, #b91c1c, #991b1b);
+      color: white;
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 92px;
+      z-index: 998;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    /* -------------------------------------------------------------
+       3. STICKY 1-TAP SOS BUTTON & RADAR COUNTDOWN MODAL
+       ------------------------------------------------------------- */
+    .sos-sticky-button {
+      position: fixed;
+      bottom: 26px;
+      right: 26px;
+      z-index: 9999;
+      background: linear-gradient(135deg, #ff003c 0%, #aa0022 100%);
+      color: #ffffff;
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 8px 28px rgba(255, 0, 60, 0.65);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: alertPulseRed 1.8s infinite;
+    }
+    .sos-sticky-button:hover {
+      transform: scale(1.12);
+    }
+    .sos-sticky-button .sos-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    /* SOS Modal Backdrop & Card */
+    .sos-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 5, 12, 0.88);
+      backdrop-filter: blur(14px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      padding: 20px;
+    }
+    .sos-modal-card {
+      background: #0f1629;
+      border: 2px solid var(--red-alert);
+      box-shadow: 0 0 50px rgba(255, 42, 95, 0.5);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 480px;
+      padding: 32px;
+      text-align: center;
+      position: relative;
+      animation: scaleIn 0.25s ease-out;
+    }
+    @keyframes scaleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .countdown-svg-wrapper {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 20px auto;
+    }
+    .countdown-svg {
+      transform: rotate(-90deg);
+    }
+    .countdown-circle-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.1);
+      stroke-width: 10;
+    }
+    .countdown-circle-progress {
+      fill: none;
+      stroke: var(--red-alert);
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 377;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear;
+    }
+    .countdown-number {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.2rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    /* -------------------------------------------------------------
+       4. SECTION 1: HERO & ANIMATED SENSOR RADAR
+       ------------------------------------------------------------- */
+    .hero-section {
+      padding: 60px 0 80px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .hero-content h1 {
+      font-size: clamp(2.4rem, 4.8vw, 3.8rem);
+      font-weight: 900;
+      line-height: 1.12;
+      margin-bottom: 18px;
+      letter-spacing: -1px;
+    }
+    .hero-content h1 span.gradient-text {
+      background: linear-gradient(135deg, #ffffff 20%, var(--cyan-neon) 75%, var(--blue-deep) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-tagline {
+      font-size: 1.3rem;
+      color: var(--cyan-neon);
+      font-weight: 700;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .hero-description {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 28px;
+      max-width: 580px;
+    }
+    .hero-cta-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    /* Live Hero Radar Canvas */
+    .hero-radar-card {
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+    #hero-radar-canvas {
+      width: 100%;
+      height: 340px;
+      border-radius: var(--radius-md);
+      background: radial-gradient(circle, #081630 0%, #040916 100%);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+    .radar-stats-overlay {
+      position: absolute;
+      bottom: 30px;
+      left: 30px;
+      right: 30px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      background: rgba(6, 12, 26, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      backdrop-filter: blur(8px);
+    }
+    .radar-stat-box .val {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--cyan-neon);
+    }
+    .radar-stat-box .lbl {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* -------------------------------------------------------------
+       5. SECTION 2: LIVE MAP (MAIN FEATURE)
+       ------------------------------------------------------------- */
+    .map-section {
+      padding: 60px 0;
+    }
+    .map-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      height: 680px;
+    }
+    #leaflet-map {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      z-index: 10;
+      box-shadow: var(--shadow-glass);
+    }
+    .map-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .layer-toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+    .layer-toggle-btn.active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan-neon);
+      color: var(--cyan-neon);
+    }
+
+    /* Custom Leaflet Pulsing Markers */
+    .leaflet-pulsing-icon {
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .marker-flood {
+      background: #0077ff;
+      box-shadow: 0 0 16px #0077ff;
+    }
+    .marker-fire {
+      background: #ff5500;
+      box-shadow: 0 0 16px #ff5500;
+      animation: alertPulseRed 1.5s infinite;
+    }
+    .marker-accident {
+      background: #ff0055;
+      box-shadow: 0 0 16px #ff0055;
+    }
+    .marker-shelter {
+      background: #00ff88;
+      color: #060913;
+      box-shadow: 0 0 16px #00ff88;
+    }
+    .marker-priority {
+      background: #a855f7;
+      box-shadow: 0 0 18px #a855f7;
+      animation: alertPulseCyan 2s infinite;
+    }
+    .marker-drone {
+      background: #00f0ff;
+      color: #060913;
+      box-shadow: 0 0 20px #00f0ff;
+    }
+
+    /* -------------------------------------------------------------
+       6. SECTION 3: AI RISK DETECTION & SENSOR TELEMETRY
+       ------------------------------------------------------------- */
+    .risk-section {
+      padding: 60px 0;
+    }
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .risk-card {
+      padding: 24px;
+      border-left: 5px solid transparent;
+    }
+    .risk-card.low { border-left-color: var(--green-safe); }
+    .risk-card.medium { border-left-color: var(--amber-warn); }
+    .risk-card.high { border-left-color: #ff6b00; }
+    .risk-card.critical { border-left-color: var(--red-alert); }
+    
+    .risk-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .badge-critical { background: rgba(255, 42, 95, 0.2); color: var(--red-alert); }
+    .badge-high { background: rgba(255, 107, 0, 0.2); color: #ff6b00; }
+    .badge-medium { background: rgba(255, 170, 0, 0.2); color: var(--amber-warn); }
+    .badge-low { background: rgba(0, 255, 136, 0.2); color: var(--green-safe); }
+
+    .prediction-banner {
+      background: linear-gradient(135deg, rgba(255, 42, 95, 0.15) 0%, rgba(12, 22, 42, 0.8) 100%);
+      border: 1px solid var(--red-alert);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .confidence-meter {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--cyan-neon);
+      text-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    /* Sensor Telemetry Canvas */
+    .sensor-telemetry-box {
+      margin-top: 30px;
+      padding: 24px;
+    }
+    #sensor-graph-canvas {
+      width: 100%;
+      height: 220px;
+      margin-top: 15px;
+    }
+
+    /* -------------------------------------------------------------
+       7. SECTION 4: SMART DISPATCH & LIVE ETA TRACKER
+       ------------------------------------------------------------- */
+    .dispatch-section {
+      padding: 60px 0;
+    }
+    .dispatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .dispatch-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .unit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .unit-type-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--border-subtle);
+    }
+    .unit-eta-val {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--cyan-neon);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* -------------------------------------------------------------
+       8. SECTION 5: PRIORITY RESCUE MODE
+       ------------------------------------------------------------- */
+    .priority-section {
+      padding: 60px 0;
+    }
+    .priority-toggle-bar {
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid var(--purple-priority);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .priority-badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--purple-priority);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 999px;
+      letter-spacing: 1px;
+    }
+    .priority-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .priority-card {
+      padding: 22px;
+      border-top: 4px solid var(--purple-priority);
+    }
+
+    /* -------------------------------------------------------------
+       9. SECTION 6: SMART ALERTS & MULTILINGUAL BROADCASTS
+       ------------------------------------------------------------- */
+    .alerts-section {
+      padding: 60px 0;
+    }
+    .alert-controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .lang-switcher-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .lang-switcher-btn.active {
+      background: var(--cyan-neon);
+      color: #060913;
+      border-color: var(--cyan-neon);
+    }
+    .mockup-alert-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .phone-alert-card {
+      background: rgba(18, 25, 44, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 22px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+    }
+    .phone-alert-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+
+    /* -------------------------------------------------------------
+       10. SECTION 7: CORE FEATURES MATRIX
+       ------------------------------------------------------------- */
+    .features-section {
+      padding: 60px 0;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .feature-box {
+      padding: 28px 22px;
+    }
+    .feature-icon-bubble {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: rgba(0, 240, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-subtle);
+      color: var(--cyan-neon);
+    }
+
+    /* -------------------------------------------------------------
+       11. SECTION 8: ADMIN & EOC DASHBOARD (POWER BI STYLE)
+       ------------------------------------------------------------- */
+    .admin-section {
+      padding: 60px 0;
+    }
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .kpi-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: rgba(0, 240, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+    .kpi-num {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #fff;
+    }
+    .admin-charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .chart-container-box {
+      padding: 24px;
+    }
+    .chart-canvas {
+      width: 100%;
+      height: 240px;
+    }
+
+    /* -------------------------------------------------------------
+       12. SECTION 9: MOBILE & OFFLINE EMERGENCY DIRECTORY
+       ------------------------------------------------------------- */
+    .directory-section {
+      padding: 60px 0;
+    }
+    .contacts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .contact-card {
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dial-btn {
+      background: rgba(0, 255, 136, 0.15);
+      color: var(--green-safe);
+      border: 1px solid var(--green-safe);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dial-btn:hover {
+      background: var(--green-safe);
+      color: #060913;
+    }
+
+    /* -------------------------------------------------------------
+       13. UNIQUE INTERACTIVE INNOVATIONS
+       ------------------------------------------------------------- */
+    /* What-If Simulator & Time Machine Grid */
+    .interactive-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 30px;
+    }
+    .slider-group {
+      margin-bottom: 20px;
+    }
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      margin-bottom: 6px;
+    }
+    .range-input {
+      width: 100%;
+      accent-color: var(--cyan-neon);
+      cursor: pointer;
+      height: 6px;
+      border-radius: 3px;
+    }
+
+    /* Drone Thermal HUD Simulation */
+    .drone-hud-wrapper {
+      position: relative;
+      background: #020611;
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-top: 24px;
+    }
+    #drone-thermal-canvas {
+      width: 100%;
+      height: 280px;
+      display: block;
+    }
+    .hud-overlay-text {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #00ff88;
+      text-shadow: 0 0 6px #00ff88;
+      pointer-events: none;
+    }
+    .hud-crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      border: 1px dashed rgba(0, 240, 255, 0.7);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* AI First Aid Chatbot Floating Widget */
+    .chatbot-fab {
+      position: fixed;
+      bottom: 26px;
+      left: 26px;
+      z-index: 9998;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--cyan-neon);
+      color: var(--cyan-neon);
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 240, 255, 0.35);
+      transition: var(--transition-smooth);
+    }
+    .chatbot-fab:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 25px var(--cyan-neon);
+    }
+    .chatbot-drawer {
+      position: fixed;
+      bottom: 96px;
+      left: 26px;
+      width: 380px;
+      max-width: calc(100vw - 40px);
+      height: 520px;
+      background: #0a1122;
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-md);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      z-index: 10000;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chatbot-header {
+      padding: 14px 18px;
+      background: rgba(0, 240, 255, 0.08);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .chat-bubble {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      max-width: 85%;
+      line-height: 1.45;
+    }
+    .chat-bubble.bot {
+      background: rgba(16, 28, 54, 0.9);
+      border: 1px solid var(--border-subtle);
+      align-self: flex-start;
+      color: #e2e8f0;
+    }
+    .chat-bubble.user {
+      background: var(--blue-deep);
+      color: #fff;
+      align-self: flex-end;
+    }
+    .quick-chips-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .quick-chip {
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--border-subtle);
+      color: var(--cyan-neon);
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .chat-input-bar {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid var(--border-subtle);
+      background: #080e1c;
+      gap: 8px;
+    }
+    .chat-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      color: #fff;
+      font-size: 0.88rem;
+    }
+
+    /* Modal Windows (Incident Report & General) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 8, 18, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 10002;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-box {
+      background: #0b1426;
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-md);
+      width: 100%;
+      max-width: 540px;
+      padding: 28px;
+      position: relative;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.8);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* Form Inputs */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .form-control {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 0.95rem;
+      transition: var(--transition-smooth);
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--cyan-neon);
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    /* -------------------------------------------------------------
+       14. RESPONSIVE QUERIES & MOBILE ADJUSTMENTS
+       ------------------------------------------------------------- */
+    @media (max-width: 992px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+      .map-wrapper {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      #leaflet-map {
+        height: 480px;
+      }
+      .admin-charts-grid, .interactive-grid {
+        grid-template-columns: 1fr;
+      }
+      .nav-links {
+        display: none;
+      }
+    }
+    @media (max-width: 640px) {
+      .sos-sticky-button {
+        bottom: 20px;
+        right: 20px;
+        width: 68px;
+        height: 68px;
+        font-size: 0.72rem;
+      }
+      .hero-content h1 {
+        font-size: 2.2rem;
+      }
+      .btn {
+        width: 100%;
+      }
+      .hero-cta-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =====================================================================
+       2. TOP TELEMETRY BAR & GLOBAL NAVIGATION
+       ================================------------------------------------- -->
+  <div class="top-telemetry-bar" role="region" aria-label="System Live Status">
+    <div class="container telemetry-flex">
+      <div class="telemetry-item">
+        <span class="live-dot pulse-cyan"></span>
+        <span>SATELLITE TELEMETRY: <strong>ONLINE (99.8%)</strong></span>
+      </div>
+      <div class="telemetry-item">
+        <span class="live-dot danger pulse-danger"></span>
+        <span>4 ACTIVE HAZARDS IN SECTOR 7</span>
+      </div>
+      <div class="telemetry-item">
+        <span>SAR UNITS DEPLOYED: <strong>28 ACTIVE</strong></span>
+      </div>
+      <div class="telemetry-item">
+        <span id="live-clock">UTC 12:00:00</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="offline-banner" role="alert">
+    📡 OFFLINE MESH MODE ACTIVE — CONNECTED TO LOCAL AD-HOC EMERGENCY PEERS. CACHED DATA LOADED.
+  </div>
+
+  <nav class="navbar" role="navigation" aria-label="Main Navigation">
+    <div class="container nav-container">
+      <a href="#" class="brand-logo" aria-label="ResQAI Home">
+        <span style="color: var(--cyan-neon);">ResQ</span><span style="color: #fff;">AI</span>
+        <span class="ai-badge">DISASTER OS</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#live-map-section">Live Map</a></li>
+        <li><a href="#risk-detection-section">AI Risk</a></li>
+        <li><a href="#smart-dispatch-section">Dispatch</a></li>
+        <li><a href="#priority-rescue-section">Priority</a></li>
+        <li><a href="#smart-alerts-section">Alerts</a></li>
+        <li><a href="#simulators-section">Simulators</a></li>
+        <li><a href="#admin-section">EOC Admin</a></li>
+      </ul>
+
+      <div class="nav-controls">
+        <button id="emergency-mode-toggle" class="toggle-pill" aria-pressed="false" title="Toggle High Contrast Emergency Mode">
+          🚨 Emergency Mode
+        </button>
+        <button id="large-text-toggle" class="toggle-pill" aria-pressed="false" title="Enlarge Text Size">
+          ♿ A+
+        </button>
+        <button id="offline-sim-toggle" class="toggle-pill" aria-pressed="false" title="Simulate Offline Cellular Outage">
+          📡 Mesh
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- =====================================================================
+       3. STICKY 1-TAP SOS BUTTON & RADAR COUNTDOWN MODAL
+       ================================------------------------------------- -->
+  <button id="sos-trigger-btn" class="sos-sticky-button" aria-label="Emergency SOS Rescue Button" title="Hold or Tap for Emergency SOS">
+    <span class="sos-icon">🆘</span>
+    <span>SOS</span>
+  </button>
+
+  <div id="sos-modal-overlay" class="sos-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sos-modal-title">
+    <div class="sos-modal-card">
+      <h2 id="sos-modal-title" style="color: var(--red-alert); font-size: 1.8rem; margin-bottom: 6px;">
+        🚨 EMERGENCY SOS TRIGGERED
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Transmitting live GPS telemetry, audio beacon & biometric distress signal to Central EOC.
+      </p>
+
+      <div class="countdown-svg-wrapper">
+        <svg class="countdown-svg" width="140" height="140">
+          <circle class="countdown-circle-bg" cx="70" cy="70" r="60"></circle>
+          <circle id="countdown-circle" class="countdown-circle-progress" cx="70" cy="70" r="60"></circle>
+        </svg>
+        <div id="countdown-number" class="countdown-number">5</div>
+      </div>
+
+      <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <input type="checkbox" id="silent-sos-check" style="accent-color: var(--red-alert); cursor: pointer;">
+        <label for="silent-sos-check" style="font-size: 0.85rem; color: var(--text-muted); cursor: pointer;">
+          Silent SOS (Covert transmission without siren tones)
+        </label>
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button id="cancel-sos-btn" class="btn btn-outline" style="min-width: 140px;">
+          ✖ CANCEL (False Alarm)
+        </button>
+        <button id="instant-sos-btn" class="btn btn-primary" style="min-width: 140px;">
+          🚀 TRANSMIT NOW
+        </button>
+      </div>
+
+      <div id="sos-status-feedback" style="margin-top: 18px; font-size: 0.85rem; color: var(--green-safe); display: none;">
+        ✓ DISTRESS BEACON ACTIVE: Unit SAR Boat Alpha-1 dispatched to your coordinates!
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- =====================================================================
+         4. SECTION 1: HERO & ANIMATED RADAR
+         ================================------------------------------------- -->
+    <section class="hero-section" id="hero-section">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-content">
+            <div class="section-tag pulse-cyan">
+              <span>⚡</span> AUTONOMOUS EMERGENCY DISASTER ENGINE
+            </div>
+            <h1>
+              AI-Powered <br>
+              <span class="gradient-text">Real-Time Rescue</span> System
+            </h1>
+            <div class="hero-tagline">
+              From detection to rescue in seconds
+            </div>
+            <p class="hero-description">
+              ResQAI unifies satellite hydrology, autonomous SAR drone swarms, crowd-verified intelligence, and predictive deep learning to route evacuations and dispatch rescue teams ahead of disaster strikes.
+            </p>
+
+            <div class="hero-cta-group">
+              <button id="hero-report-btn" class="btn btn-primary">
+                🚨 Report Emergency
+              </button>
+              <a href="#live-map-section" class="btn btn-secondary">
+                🗺 View Live Map
+              </a>
+              <button id="voice-report-quick-btn" class="btn btn-outline" title="Speak your emergency using Web Speech API">
+                🎙 Speak Emergency
+              </button>
+            </div>
+
+            <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+              <div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: #fff;">1,420+</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Evacuated Safely</div>
+              </div>
+              <div style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px;">
+                <div style="font-size: 1.5rem; font-weight: 800; color: var(--cyan-neon);">3.8 min</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Avg SAR Response</div>
+              </div>
+              <div style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px;">
+                <div style="font-size: 1.5rem; font-weight: 800; color: var(--green-safe);">99.4%</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Prediction Accuracy</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Animated World / Regional Radar Canvas -->
+          <div class="glass-card hero-radar-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: var(--cyan-neon);">
+                🌐 SATELLITE RADAR &amp; INCIDENT SCANNER
+              </span>
+              <span class="live-dot pulse-cyan"></span>
+            </div>
+            <canvas id="hero-radar-canvas"></canvas>
+            <div class="radar-stats-overlay">
+              <div class="radar-stat-box">
+                <div class="val" id="active-hazards-count">4</div>
+                <div class="lbl">Hazard Zones</div>
+              </div>
+              <div class="radar-stat-box">
+                <div class="val" id="active-drones-count">6</div>
+                <div class="lbl">Drones Active</div>
+              </div>
+              <div class="radar-stat-box">
+                <div class="val" id="radar-sweep-speed">2.4 GHz</div>
+                <div class="lbl">Mesh Link</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         5. SECTION 2: LIVE MAP (MAIN FEATURE)
+         ================================------------------------------------- -->
+    <section class="map-section" id="live-map-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">GEOSPATIAL INTELLIGENCE</div>
+          <h2 class="section-title">Live Tactical Operations Map</h2>
+          <p class="section-subtitle">
+            Dynamic Mapbox + Leaflet GIS visualizer featuring expanding inundation zones, green AI-calculated safe evacuation corridors, and real-time response vehicle positions.
+          </p>
+        </div>
+
+        <div class="map-wrapper">
+          <div id="leaflet-map" role="region" aria-label="Interactive Tactical Disaster Map"></div>
+
+          <aside class="glass-card map-sidebar">
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 6px;">
+              Layer Controls
+            </h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+              Toggle map hazard overlays, routes, and humanitarian relief points.
+            </p>
+
+            <button class="layer-toggle-btn active" data-layer="floods">
+              <span>🌊 Flood Zones (Expanding)</span>
+              <span class="live-dot danger"></span>
+            </button>
+            <button class="layer-toggle-btn active" data-layer="fires">
+              <span>🔥 Urban Wildfires</span>
+              <span class="live-dot danger"></span>
+            </button>
+            <button class="layer-toggle-btn active" data-layer="accidents">
+              <span>💥 Structural Collapses</span>
+              <span class="live-dot danger"></span>
+            </button>
+            <button class="layer-toggle-btn active" data-layer="routes">
+              <span>🟢 Safe vs 🔴 Danger Routes</span>
+              <span class="live-dot"></span>
+            </button>
+            <button class="layer-toggle-btn active" data-layer="shelters">
+              <span>🏠 Relief Shelters</span>
+              <span class="live-dot"></span>
+            </button>
+            <button class="layer-toggle-btn active" data-layer="priority">
+              <span>👵 Priority Rescue Sites</span>
+              <span class="live-dot" style="background: var(--purple-priority);"></span>
+            </button>
+            <button class="layer-toggle-btn active" data-layer="drones">
+              <span>🚁 Drone Search Paths</span>
+              <span class="live-dot pulse-cyan"></span>
+            </button>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 6px 0;">
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <button id="user-locate-btn" class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 12px;">
+                📍 Locate My Position
+              </button>
+              <button id="toggle-expansion-btn" class="btn btn-outline" style="font-size: 0.85rem; padding: 8px 12px;">
+                ⏸ Pause Danger Zone Expansion
+              </button>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--text-muted);">
+              <strong>Map Legend:</strong><br>
+              <span style="color: #00ff88;">━━</span> Recommended Green Safe Evacuation Route<br>
+              <span style="color: #ff2a5f;">━━</span> Submerged/Blocked Danger Route<br>
+              <span style="color: #00f0ff;">◯</span> Dynamic Flood Perimeters (Expanding)
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         6. SECTION 3: AI RISK DETECTION & SENSOR TELEMETRY
+         ================================------------------------------------- -->
+    <section class="risk-section" id="risk-detection-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">PREDICTIVE HYDROLOGY &amp; NEURAL RISK</div>
+          <h2 class="section-title">AI Multi-Hazard Risk Detection</h2>
+          <p class="section-subtitle">
+            Real-time inference generated by convolutional hydrological models analyzing river gauges, radar precipitation, and topography.
+          </p>
+        </div>
+
+        <div class="risk-grid">
+          <div class="glass-card risk-card critical">
+            <span class="risk-badge badge-critical">CRITICAL RISK (94.6%)</span>
+            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">Sector 7 — River Valley</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 14px;">
+              Flash flood surge triggered by upstream reservoir overflow. Water level +2.4m above danger threshold.
+            </p>
+            <div style="font-size: 0.8rem; color: #fff;">
+              <strong>Time to Inundation:</strong> <span style="color: var(--red-alert); font-weight: 800;">28 Minutes</span>
+            </div>
+          </div>
+
+          <div class="glass-card risk-card high">
+            <span class="risk-badge badge-high">HIGH RISK (78.2%)</span>
+            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">Sector 3 — Chemical Corridor</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 14px;">
+              Industrial warehouse structural fire with toxic vapor dispersion plume moving 14 km/h south-southeast.
+            </p>
+            <div style="font-size: 0.8rem; color: #fff;">
+              <strong>Evacuation Perimeter:</strong> <span style="color: #ff6b00; font-weight: 800;">1.8 km Radius</span>
+            </div>
+          </div>
+
+          <div class="glass-card risk-card medium">
+            <span class="risk-badge badge-medium">MODERATE RISK (48.0%)</span>
+            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">Sector 5 — Downtown Overpass</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 14px;">
+              Structural fatigue detected on Highway Flyover 9 following 4.2 magnitude localized tremor.
+            </p>
+            <div style="font-size: 0.8rem; color: #fff;">
+              <strong>Status:</strong> <span style="color: var(--amber-warn); font-weight: 800;">Traffic Diverted to Route C</span>
+            </div>
+          </div>
+
+          <div class="glass-card risk-card low">
+            <span class="risk-badge badge-low">LOW RISK (12.4%)</span>
+            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">Sector 1 — Highlands East</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 14px;">
+              Elevated terrain operating as prime humanitarian assembly zone. Primary medical triage point clear.
+            </p>
+            <div style="font-size: 0.8rem; color: #fff;">
+              <strong>Shelter Capacity:</strong> <span style="color: var(--green-safe); font-weight: 800;">82% Available</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="prediction-banner">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <span style="font-size: 1.4rem;">⚠️</span>
+              <strong style="font-size: 1.15rem; color: #fff;">PREDICTIVE AI EVACUATION WARNING</strong>
+            </div>
+            <p style="color: var(--text-muted); max-width: 720px; font-size: 0.95rem;">
+              Hydrological LSTM Neural Engine forecasts <strong>Sector 7 Basin will submerge up to 1.8 meters within 28 minutes</strong>. Critical window for ground vehicle evacuation terminates at 12:45 PM. Evacuate immediately via Green Route Alpha.
+            </p>
+          </div>
+          <div style="text-align: right;">
+            <div class="confidence-meter">94.6%</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Confidence Interval</div>
+          </div>
+        </div>
+
+        <div class="glass-card sensor-telemetry-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff;">Live Sensor Telemetry Streams</h3>
+              <p style="font-size: 0.8rem; color: var(--text-muted);">Real-time IoT water depth (cm), rainfall rate (mm/h), and wind velocity (km/h)</p>
+            </div>
+            <div style="display: flex; gap: 12px; font-size: 0.75rem;">
+              <span style="color: var(--cyan-neon);">■ Water Gauge (cm)</span>
+              <span style="color: var(--red-alert);">■ Precipitation (mm/h)</span>
+              <span style="color: var(--amber-warn);">■ Wind Velocity (km/h)</span>
+            </div>
+          </div>
+          <canvas id="sensor-graph-canvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         7. SECTION 4: SMART DISPATCH & LIVE ETA TRACKING
+         ================================------------------------------------- -->
+    <section class="dispatch-section" id="smart-dispatch-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">AUTONOMOUS COORDINATION</div>
+          <h2 class="section-title">Smart Autonomous SAR Dispatch</h2>
+          <p class="section-subtitle">
+            Algorithmically dispatches the closest specialized emergency units based on traffic routing, flood depth obstacles, and medical triage priority.
+          </p>
+        </div>
+
+        <div class="dispatch-grid">
+          <div class="glass-card dispatch-card">
+            <div class="unit-header">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="unit-type-icon">🚤</div>
+                <div>
+                  <h4 style="font-weight: 800; color: #fff;">Unit SAR Boat Alpha-1</h4>
+                  <span style="font-size: 0.75rem; color: var(--green-safe);">NDRF Swift Water Rescue</span>
+                </div>
+              </div>
+              <span class="live-dot pulse-cyan"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Live ETA</span>
+                <div class="unit-eta-val" id="eta-boat">04:12</div>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Distance</span>
+                <div style="font-size: 1.1rem; font-weight: 700; color: #fff;">1.6 km</div>
+              </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: var(--radius-sm); font-size: 0.8rem;">
+              <strong>Mission:</strong> Rescuing 6 stranded residents trapped on second floor near Riverfront Market.
+            </div>
+            <button class="btn btn-secondary" style="font-size: 0.85rem;" onclick="trackUnitOnMap('boat')">
+              🎯 Center On Tactical Map
+            </button>
+          </div>
+
+          <div class="glass-card dispatch-card">
+            <div class="unit-header">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="unit-type-icon">🚑</div>
+                <div>
+                  <h4 style="font-weight: 800; color: #fff;">ALS Ambulance Med-04</h4>
+                  <span style="font-size: 0.75rem; color: var(--cyan-neon);">Advanced Life Support</span>
+                </div>
+              </div>
+              <span class="live-dot pulse-cyan"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Live ETA</span>
+                <div class="unit-eta-val" id="eta-med">02:35</div>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Distance</span>
+                <div style="font-size: 1.1rem; font-weight: 700; color: #fff;">0.9 km</div>
+              </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: var(--radius-sm); font-size: 0.8rem;">
+              <strong>Mission:</strong> Oxygen transport and pediatric transfer from Sector 7 Maternity Ward.
+            </div>
+            <button class="btn btn-secondary" style="font-size: 0.85rem;" onclick="trackUnitOnMap('ambulance')">
+              🎯 Center On Tactical Map
+            </button>
+          </div>
+
+          <div class="glass-card dispatch-card">
+            <div class="unit-header">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="unit-type-icon">🚒</div>
+                <div>
+                  <h4 style="font-weight: 800; color: #fff;">Hazmat Brigade Unit-12</h4>
+                  <span style="font-size: 0.75rem; color: #ff6b00;">Industrial Suppression</span>
+                </div>
+              </div>
+              <span class="live-dot pulse-danger"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Live ETA</span>
+                <div class="unit-eta-val" id="eta-fire">05:48</div>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Distance</span>
+                <div style="font-size: 1.1rem; font-weight: 700; color: #fff;">2.8 km</div>
+              </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: var(--radius-sm); font-size: 0.8rem;">
+              <strong>Mission:</strong> Chemical foam containment at Warehouse C2; perimeter cooling.
+            </div>
+            <button class="btn btn-secondary" style="font-size: 0.85rem;" onclick="trackUnitOnMap('fire')">
+              🎯 Center On Tactical Map
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         8. SECTION 5: PRIORITY RESCUE MODE
+         ================================------------------------------------- -->
+    <section class="priority-section" id="priority-rescue-section">
+      <div class="container">
+        <div class="priority-toggle-bar">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="priority-badge-live">🛡 PRIORITY RESCUE MODE: ACTIVE</span>
+            <span style="font-size: 0.9rem; color: #e2e8f0;">
+              Vulnerable Demographic First Protocol (Hospitals, Elder Care, Mobility-Impaired)
+            </span>
+          </div>
+          <button id="priority-mode-toggle" class="btn btn-outline" style="font-size: 0.82rem; padding: 6px 14px;">
+            Toggle Priority Override
+          </button>
+        </div>
+
+        <div class="priority-grid">
+          <div class="glass-card priority-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.75rem; color: var(--purple-priority); font-weight: 800;">TIER 1 — IMMEDIATE</span>
+              <span class="live-dot pulse-cyan"></span>
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff;">Evergreen Senior Living</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+              42 elderly residents, 14 wheelchair-bound. Ground floor compromised by rising water.
+            </p>
+            <div style="font-size: 0.8rem; background: rgba(168, 85, 247, 0.15); padding: 8px; border-radius: 6px; margin-bottom: 12px;">
+              <strong>Assigned SAR:</strong> Rescue Bus Alpha + 2 Paramedics En Route
+            </div>
+            <div style="font-size: 0.75rem; color: var(--green-safe); font-weight: 700;">
+              ✓ Power backup stable • 28 Patients already moved to 2nd floor
+            </div>
+          </div>
+
+          <div class="glass-card priority-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.75rem; color: var(--purple-priority); font-weight: 800;">TIER 1 — CRITICAL</span>
+              <span class="live-dot pulse-cyan"></span>
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff;">St. Jude Children's Hospital</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+              110 pediatric patients. Neonatal ICU requires continuous auxiliary power generator fuel.
+            </p>
+            <div style="font-size: 0.8rem; background: rgba(168, 85, 247, 0.15); padding: 8px; border-radius: 6px; margin-bottom: 12px;">
+              <strong>Assigned SAR:</strong> Diesel Fuel Boat + Heavy Lift Evacuation Team
+            </div>
+            <div style="font-size: 0.75rem; color: var(--cyan-neon); font-weight: 700;">
+              ✓ Generator fuel delivery scheduled in 8 mins
+            </div>
+          </div>
+
+          <div class="glass-card priority-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.75rem; color: var(--purple-priority); font-weight: 800;">TIER 2 — REGISTERED</span>
+              <span class="live-dot"></span>
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff;">Sector 4 Mobility Roster</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+              18 pre-registered disabled citizens in ground floor apartments.
+            </p>
+            <div style="font-size: 0.8rem; background: rgba(168, 85, 247, 0.15); padding: 8px; border-radius: 6px; margin-bottom: 12px;">
+              <strong>Assigned SAR:</strong> Volunteer Van Squad 03
+            </div>
+            <div style="font-size: 0.75rem; color: var(--green-safe); font-weight: 700;">
+              ✓ 12/18 Verified Safe • 6 In Evacuation Transit
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         9. SECTION 6: SMART ALERTS & MULTILINGUAL BROADCASTS
+         ================================------------------------------------- -->
+    <section class="alerts-section" id="smart-alerts-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">CITIZEN NOTIFICATION SYSTEM</div>
+          <h2 class="section-title">Smart Multilingual Alerts</h2>
+          <p class="section-subtitle">
+            Localized cell broadcast and SMS simulation delivered in English and Hindi (हिन्दी) with dynamic text-to-speech audio read-aloud.
+          </p>
+        </div>
+
+        <div class="alert-controls-bar">
+          <div style="display: flex; gap: 8px;">
+            <button id="lang-en-btn" class="lang-switcher-btn active">English</button>
+            <button id="lang-hi-btn" class="lang-switcher-btn">हिन्दी (Hindi)</button>
+          </div>
+          <button id="simulate-broadcast-btn" class="btn btn-secondary" style="font-size: 0.85rem; padding: 6px 14px;">
+            📢 Broadcast New Simulated Alert
+          </button>
+        </div>
+
+        <div class="mockup-alert-stream" id="alerts-stream-container">
+          <div class="phone-alert-card" data-lang-en="⚠ EVACUATION ALERT: Flash flood breach detected at Riverbank Dam. Evacuate immediately via Green Route Alpha to City Stadium Shelter. Avoid Underpass 4." data-lang-hi="⚠ निकासी चेतावनी: रिवरबैंक बांध पर बाढ़ का पानी बढ़ गया है। तुरंत ग्रीन रूट 'अल्फा' से सिटी स्टेडियम शेल्टर की ओर निकलें। अंडरपास 4 से बचें।">
+            <div class="phone-alert-icon">🌊</div>
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <strong style="color: var(--red-alert); font-size: 0.95rem;">NATIONAL EMERGENCY BROADCAST</strong>
+                <span style="font-size: 0.75rem; color: var(--text-dim);">JUST NOW</span>
+              </div>
+              <p class="alert-text-body" style="font-size: 0.9rem; color: #fff; margin-bottom: 8px;">
+                ⚠ EVACUATION ALERT: Flash flood breach detected at Riverbank Dam. Evacuate immediately via Green Route Alpha to City Stadium Shelter. Avoid Underpass 4.
+              </p>
+              <button class="btn btn-outline tts-speak-btn" style="min-height: 32px; padding: 4px 10px; font-size: 0.75rem;">
+                🔊 Read Aloud (Voice)
+              </button>
+            </div>
+          </div>
+
+          <div class="phone-alert-card" data-lang-en="🔥 HAZARD WARNING: Industrial chemical fire in Sector 3. Dense smoke plume moving south. Keep windows sealed and avoid outdoor activity." data-lang-hi="🔥 खतरे की चेतावनी: सेक्टर 3 में औद्योगिक रासायनिक आग। घना धुआं दक्षिण की ओर बढ़ रहा है। खिड़कियां बंद रखें और घर के अंदर रहें।">
+            <div class="phone-alert-icon">🔥</div>
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <strong style="color: var(--amber-warn); font-size: 0.95rem;">DISASTER MANAGEMENT ADVISORY</strong>
+                <span style="font-size: 0.75rem; color: var(--text-dim);">14 MIN AGO</span>
+              </div>
+              <p class="alert-text-body" style="font-size: 0.9rem; color: #fff; margin-bottom: 8px;">
+                🔥 HAZARD WARNING: Industrial chemical fire in Sector 3. Dense smoke plume moving south. Keep windows sealed and avoid outdoor activity.
+              </p>
+              <button class="btn btn-outline tts-speak-btn" style="min-height: 32px; padding: 4px 10px; font-size: 0.75rem;">
+                🔊 Read Aloud (Voice)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         10. SECTION 7: CORE SYSTEM FEATURES
+         ================================------------------------------------- -->
+    <section class="features-section" id="features-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">SYSTEM CAPABILITIES</div>
+          <h2 class="section-title">Built for Mission-Critical Resilience</h2>
+          <p class="section-subtitle">
+            Engineered to operate uninterrupted during massive power cuts, cellular tower outages, and severe environmental interference.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <div class="glass-card feature-box">
+            <div class="feature-icon-bubble">⚡</div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 8px;">Sub-Second Edge AI</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              Runs lightweight neural inference models directly in browser and edge repeaters without relying on central cloud pipelines.
+            </p>
+          </div>
+
+          <div class="glass-card feature-box">
+            <div class="feature-icon-bubble">🗺</div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 8px;">Dynamic Obstacle Reroute</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              Continuously repaints evacuation corridors in green as floodwaters submerge secondary roads, avoiding fatal dead-ends.
+            </p>
+          </div>
+
+          <div class="glass-card feature-box">
+            <div class="feature-icon-bubble">🚁</div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 8px;">Autonomous Drone Swarms</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              Autonomous search grids with computer vision thermal detection pinpoints trapped survivors on rooftops at night.
+            </p>
+          </div>
+
+          <div class="glass-card feature-box">
+            <div class="feature-icon-bubble">📡</div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 8px;">Zero-Internet Mesh Relay</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              Nearby citizen smartphones relay SOS packets hop-by-hop using Bluetooth Low Energy and Wi-Fi Direct to EOC gateways.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         11. SECTION 8: ADMIN & EOC DASHBOARD (POWER BI STYLE)
+         ================================------------------------------------- -->
+    <section class="admin-section" id="admin-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">COMMAND &amp; CONTROL</div>
+          <h2 class="section-title">EOC Operations Analytics Dashboard</h2>
+          <p class="section-subtitle">
+            Executive disaster overview with live incident velocity, fleet mobilization ratios, and sector-wide compliance analytics.
+          </p>
+        </div>
+
+        <div class="kpi-row">
+          <div class="glass-card kpi-card">
+            <div class="kpi-icon">🚨</div>
+            <div>
+              <div class="kpi-num" id="kpi-incidents">12</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Active Incidents</div>
+            </div>
+          </div>
+
+          <div class="glass-card kpi-card">
+            <div class="kpi-icon">🚑</div>
+            <div>
+              <div class="kpi-num" id="kpi-teams">34</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">SAR Teams Deployed</div>
+            </div>
+          </div>
+
+          <div class="glass-card kpi-card">
+            <div class="kpi-icon">⏱</div>
+            <div>
+              <div class="kpi-num" style="color: var(--cyan-neon);">3.8m</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Avg Response Time</div>
+            </div>
+          </div>
+
+          <div class="glass-card kpi-card">
+            <div class="kpi-icon">🛡</div>
+            <div>
+              <div class="kpi-num" style="color: var(--green-safe);">88.4%</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Evacuation Progress</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-charts-grid">
+          <div class="glass-card chart-container-box">
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 6px;">
+              Incidents by Disaster Category
+            </h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+              Flooding (50%), Fire (25%), Structural (15%), Medical (10%)
+            </p>
+            <canvas id="category-donut-canvas" class="chart-canvas"></canvas>
+          </div>
+
+          <div class="glass-card chart-container-box">
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 6px;">
+              Hourly Rescues &amp; Influx Velocity
+            </h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+              Citizens safely extracted per hour over past 6-hour timeline
+            </p>
+            <canvas id="velocity-bar-canvas" class="chart-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         12. SECTION 9: MOBILE & OFFLINE EMERGENCY DIRECTORY
+         ================================------------------------------------- -->
+    <section class="directory-section" id="offline-directory-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">FAIL-SAFE DIRECTORY</div>
+          <h2 class="section-title">Cached Offline Emergency Contacts</h2>
+          <p class="section-subtitle">
+            Local browser-persisted telephone numbers and radio frequencies accessible with 0% cellular data or internet connection.
+          </p>
+        </div>
+
+        <div class="contacts-grid">
+          <div class="glass-card contact-card">
+            <div>
+              <strong style="color: #fff; display: block;">National Emergency SOS</strong>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Unified Police / Medical / Fire</span>
+            </div>
+            <a href="tel:112" class="dial-btn">📞 Dial 112</a>
+          </div>
+
+          <div class="glass-card contact-card">
+            <div>
+              <strong style="color: #fff; display: block;">NDRF Flood Relief</strong>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">National Disaster Response</span>
+            </div>
+            <a href="tel:1078" class="dial-btn">📞 Dial 1078</a>
+          </div>
+
+          <div class="glass-card contact-card">
+            <div>
+              <strong style="color: #fff; display: block;">Ambulance Dispatch</strong>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Immediate Critical Trauma</span>
+            </div>
+            <a href="tel:108" class="dial-btn">📞 Dial 108</a>
+          </div>
+
+          <div class="glass-card contact-card">
+            <div>
+              <strong style="color: #fff; display: block;">Coast Guard Search &amp; Rescue</strong>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Marine &amp; River Basin Emergency</span>
+            </div>
+            <a href="tel:1554" class="dial-btn">📞 Dial 1554</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         13. UNIQUE INTERACTIVE INNOVATIONS SECTION
+         ================================------------------------------------- -->
+    <section style="padding: 60px 0; background: rgba(8, 14, 28, 0.4);" id="simulators-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">NEXT-GEN SIMULATION LAB</div>
+          <h2 class="section-title">Disaster Lab &amp; Unique Tools</h2>
+          <p class="section-subtitle">
+            Test hypotheses, predict flooding with what-if parameters, verify crowd reports, replay disaster timelines, and inspect drone thermal reconnaissance.
+          </p>
+        </div>
+
+        <div class="interactive-grid">
+          <!-- Tool 1: What-If Simulator -->
+          <div class="glass-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff;">🔮 What-If Disaster Simulator</h3>
+              <span class="live-dot pulse-cyan"></span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 20px;">
+              Adjust environmental stress variables to dynamically recompute danger zones and map inundation radius live.
+            </p>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Rainfall Intensity:</span>
+                <strong id="val-rain" style="color: var(--cyan-neon);">85 mm/h</strong>
+              </div>
+              <input type="range" min="10" max="220" value="85" class="range-input" id="slider-rain">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Wind Velocity:</span>
+                <strong id="val-wind" style="color: var(--amber-warn);">45 km/h</strong>
+              </div>
+              <input type="range" min="5" max="160" value="45" class="range-input" id="slider-wind">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Population Density:</span>
+                <strong id="val-pop" style="color: #fff;">4,200 /km²</strong>
+              </div>
+              <input type="range" min="500" max="12000" step="100" value="4200" class="range-input" id="slider-pop">
+            </div>
+
+            <div style="background: rgba(0,0,0,0.35); padding: 14px; border-radius: var(--radius-sm); display: flex; justify-content: space-around; text-align: center; margin-top: 10px;">
+              <div>
+                <div style="font-size: 1.4rem; font-weight: 900; color: var(--red-alert);" id="sim-danger-index">82 / 100</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Predicted Hazard Index</div>
+              </div>
+              <div>
+                <div style="font-size: 1.4rem; font-weight: 900; color: var(--cyan-neon);" id="sim-flood-radius">2.4 km</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Inundation Radius</div>
+              </div>
+              <div>
+                <div style="font-size: 1.4rem; font-weight: 900; color: var(--amber-warn);" id="sim-evac-time">48 min</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Evac Safe Window</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tool 2: Disaster Time Machine -->
+          <div class="glass-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff;">⏪ Disaster Time Machine</h3>
+              <span class="live-dot pulse-cyan"></span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 20px;">
+              Scrub across past flood genesis and forward-projected breach spread to visualize SAR intervention efficacy.
+            </p>
+
+            <div class="slider-group" style="margin-top: 25px;">
+              <div class="slider-label-row">
+                <span>Timeline Scrubber:</span>
+                <strong id="time-machine-label" style="color: var(--cyan-neon); font-size: 1rem;">T + 00:00 (NOW)</strong>
+              </div>
+              <input type="range" min="-2" max="3" step="1" value="0" class="range-input" id="slider-time-machine">
+              <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-dim); margin-top: 6px;">
+                <span>T-2h (Breach)</span>
+                <span>T-1h</span>
+                <span style="color: var(--cyan-neon); font-weight: 800;">NOW</span>
+                <span>T+1h</span>
+                <span>T+3h (Peak Flood)</span>
+              </div>
+            </div>
+
+            <div id="time-machine-narrative" style="background: rgba(0, 240, 255, 0.08); border: 1px solid var(--border-subtle); padding: 16px; border-radius: var(--radius-sm); font-size: 0.85rem; color: #fff; min-height: 90px; margin-top: 15px;">
+              <strong>CURRENT SITUATION (T + 0h):</strong> Riverbank flood reaches 1.2m depth. 28 SAR units deployed across Sector 7. Green Route Alpha remains unobstructed for civilian evacuation.
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool 3 & 4: Drone Thermal Recon & Offline Mesh Network -->
+        <div class="interactive-grid">
+          <!-- Drone Thermal Reconnaissance -->
+          <div class="glass-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff;">🚁 Autonomous Drone Thermal Recon</h3>
+              <span class="live-dot pulse-cyan"></span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">
+              Simulated Infrared HUD feed from SkyScout Alpha scanning for human thermal signatures in flooded rooftops.
+            </p>
+
+            <div class="drone-hud-wrapper">
+              <canvas id="drone-thermal-canvas"></canvas>
+              <div class="hud-overlay-text">
+                UNIT: SKYSCOUT-01 // FLIR THERMAL 1280x720<br>
+                ALT: 48m | BATT: 84% | MODE: AUTO-SEARCH<br>
+                <span style="color: #ff3366;">TARGET: 2 HUMAN SIGNATURES (36.8°C)</span>
+              </div>
+              <div class="hud-crosshair"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px;">
+              <span style="font-size: 0.8rem; color: var(--green-safe);">● Thermal Lock: Lat 28.6142, Lon 77.2088</span>
+              <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;" onclick="triggerDronePing()">
+                📡 Ping Coordinates to SAR Boat
+              </button>
+            </div>
+          </div>
+
+          <!-- Offline Mesh Network Visualizer -->
+          <div class="glass-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff;">📡 Offline Mesh SOS Relay Visualizer</h3>
+              <span class="live-dot pulse-cyan"></span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">
+              Simulates ad-hoc peer-to-peer packet hopping over local BLE/Wi-Fi Direct when cellular towers collapse.
+            </p>
+
+            <div style="background: #020611; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; margin: 15px 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-family: monospace; font-size: 0.82rem;">
+                <div style="text-align: center;">
+                  <div style="font-size: 1.4rem;">📱</div>
+                  <strong style="color: var(--cyan-neon);">Origin Phone</strong>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Victim Device</div>
+                </div>
+                <div style="color: var(--cyan-neon); animation: blink 1s infinite;">──(BLE 25m)──▶</div>
+                <div style="text-align: center;">
+                  <div style="font-size: 1.4rem;">📱</div>
+                  <strong style="color: #fff;">Relay Peer #14</strong>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Citizen Node</div>
+                </div>
+                <div style="color: var(--cyan-neon); animation: blink 1s infinite;">──(WiFi-D)──▶</div>
+                <div style="text-align: center;">
+                  <div style="font-size: 1.4rem;">🛰</div>
+                  <strong style="color: var(--green-safe);">EOC Satellite GW</strong>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Disaster HQ</div>
+                </div>
+              </div>
+            </div>
+
+            <div id="mesh-packet-log" style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.75rem; color: #a5f3fc; height: 75px; overflow-y: auto; margin-bottom: 12px;">
+              [SYSTEM] Mesh daemon running on 2.4GHz &amp; 5GHz ad-hoc radio...<br>
+              [PEERS] 18 nearby mesh nodes registered in Sector 7 radius.
+            </div>
+
+            <button class="btn btn-outline" style="width: 100%; font-size: 0.85rem;" onclick="simulateMeshPacketSend()">
+              📨 Transmit Test SOS Packet Across Mesh
+            </button>
+          </div>
+        </div>
+
+        <!-- Tool 5 & 6: Area Resilience Score & Family Safety Check-In -->
+        <div class="interactive-grid">
+          <!-- Area Resilience Scorecard -->
+          <div class="glass-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff;">🛡 Neighborhood Resilience Index</h3>
+              <span class="section-tag" style="margin: 0; padding: 2px 8px; font-size: 0.7rem;">0-100 METRIC</span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px;">
+              Evaluates shelter proximity, drainage redundancy, hospital distance, and evacuation choke points.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                  <span>Sector 1: Highlands North</span>
+                  <strong style="color: var(--green-safe);">88 / 100 (Resilient)</strong>
+                </div>
+                <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                  <div style="width: 88%; height: 100%; background: var(--green-safe);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                  <span>Sector 4: Downtown Metro</span>
+                  <strong style="color: var(--amber-warn);">64 / 100 (Moderate)</strong>
+                </div>
+                <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                  <div style="width: 64%; height: 100%; background: var(--amber-warn);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                  <span>Sector 7: River Basin</span>
+                  <strong style="color: var(--red-alert);">32 / 100 (Vulnerable)</strong>
+                </div>
+                <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                  <div style="width: 32%; height: 100%; background: var(--red-alert);"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Family Safety Check-In Board -->
+          <div class="glass-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff;">✅ Family Safety Check-In</h3>
+              <button id="mark-safe-btn" class="btn btn-secondary" style="font-size: 0.78rem; padding: 4px 10px;">
+                ✓ I Am Safe
+              </button>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px;">
+              Broadcast your real-time safety status to your emergency circle without jamming voice telephone lines.
+            </p>
+
+            <div id="family-status-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 160px; overflow-y: auto;">
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: var(--radius-sm);">
+                <div>
+                  <strong style="font-size: 0.85rem; color: #fff;">Rahul Sharma (Father)</strong>
+                  <div style="font-size: 0.7rem; color: var(--text-dim);">City Indoor Stadium Shelter</div>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--green-safe); font-weight: 800;">🟢 SAFE</span>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: var(--radius-sm);">
+                <div>
+                  <strong style="font-size: 0.85rem; color: #fff;">Priya Sharma (Sister)</strong>
+                  <div style="font-size: 0.7rem; color: var(--text-dim);">Transit on Green Route Alpha</div>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--amber-warn); font-weight: 800;">🟡 EVACUATING</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool 7 & 8: Crowd-Verified Reports & Shelter Resource Finder -->
+        <div class="interactive-grid">
+          <!-- Crowd-Verified Reports -->
+          <div class="glass-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff;">📍 Crowd-Verified Field Reports</h3>
+              <button class="btn btn-secondary" style="font-size: 0.78rem; padding: 4px 10px;" onclick="openIncidentReportModal()">
+                + Submit Report
+              </button>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
+              Citizens upvote ground reports. AI trust scoring filters malicious rumors and false alarms.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="background: rgba(255,255,255,0.03); border-left: 3px solid var(--green-safe); padding: 10px; border-radius: var(--radius-sm);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+                  <strong style="color: #fff;">Bridge on 5th Ave cracked and impassable</strong>
+                  <span style="color: var(--green-safe); font-weight: 800;">96% Trust</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                  <span style="font-size: 0.7rem; color: var(--text-muted);">Reported 12m ago by Citizen #409</span>
+                  <div style="display: flex; gap: 6px;">
+                    <button class="btn btn-outline" style="min-height: 24px; padding: 2px 8px; font-size: 0.7rem;" onclick="upvoteReport(this)">
+                      👍 Upvote (44)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="background: rgba(255,255,255,0.03); border-left: 3px solid var(--red-alert); padding: 10px; border-radius: var(--radius-sm);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+                  <strong style="color: #fff;">Unconfirmed rumor: Dam collapsed</strong>
+                  <span style="color: var(--red-alert); font-weight: 800;">22% Trust (Flagged)</span>
+                </div>
+                <div style="font-size: 0.7rem; color: var(--red-alert); margin-top: 4px;">
+                  ⚠️ AI Fact-Check: Sensor telemetry confirms dam spillway operational. False rumor quarantined.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shelter & Resource Finder -->
+          <div class="glass-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff;">🏠 Shelter &amp; Resource Finder</h3>
+              <span class="live-dot pulse-cyan"></span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
+              Live capacity occupancy bars, food ration stockpiles, rescue boat counts, and trauma kit availability.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: var(--radius-sm);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                  <strong style="color: #fff;">Central Indoor Stadium Shelter</strong>
+                  <span style="color: var(--green-safe);">850 / 1,000 (85% Full)</span>
+                </div>
+                <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
+                  <div style="width: 85%; height: 100%; background: var(--green-safe);"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+                  <span>🍱 Food: 3 Days Left</span>
+                  <span>🚤 Boats: 4 Available</span>
+                  <span>💊 Trauma Kits: 40</span>
+                </div>
+              </div>
+
+              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: var(--radius-sm);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                  <strong style="color: #fff;">North Hill High School</strong>
+                  <span style="color: var(--cyan-neon);">240 / 600 (40% Full)</span>
+                </div>
+                <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
+                  <div style="width: 40%; height: 100%; background: var(--cyan-neon);"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+                  <span>🍱 Food: 5 Days Left</span>
+                  <span>🚤 Boats: 2 Available</span>
+                  <span>💊 Trauma Kits: 25</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =====================================================================
+       14. FLOATING AI FIRST-AID CHATBOT ("ResQ-Bot")
+       ================================------------------------------------- -->
+  <div id="chatbot-fab" class="chatbot-fab" role="button" aria-label="Open AI First Aid Chatbot" title="Ask AI First-Aid Questions">
+    🧠
+  </div>
+
+  <div id="chatbot-drawer" class="chatbot-drawer" role="dialog" aria-modal="false" aria-labelledby="chat-title">
+    <div class="chatbot-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.2rem;">🧠</span>
+        <div>
+          <strong id="chat-title" style="color: #fff; font-size: 0.95rem;">ResQ-Bot — AI First Aid</strong>
+          <div style="font-size: 0.7rem; color: var(--green-safe);">● Offline Emergency Medical Engine</div>
+        </div>
+      </div>
+      <button id="close-chat-btn" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">✕</button>
+    </div>
+
+    <div class="chat-messages" id="chat-messages-container">
+      <div class="chat-bubble bot">
+        Hello! I am your AI Emergency First-Aid Assistant. Select an emergency below or type your medical condition for step-by-step triage guidance.
+      </div>
+    </div>
+
+    <div class="quick-chips-row">
+      <button class="quick-chip" onclick="handleQuickReply('cpr')">🫀 CPR Guide</button>
+      <button class="quick-chip" onclick="handleQuickReply('bleeding')">🩸 Severe Bleeding</button>
+      <button class="quick-chip" onclick="handleQuickReply('flood')">🌊 Trapped in Flood</button>
+      <button class="quick-chip" onclick="handleQuickReply('burns')">🔥 Burn Treatment</button>
+      <button class="quick-chip" onclick="handleQuickReply('fracture')">🦴 Bone Fracture</button>
+    </div>
+
+    <form id="chat-input-form" class="chat-input-bar">
+      <input type="text" id="chat-text-input" class="chat-input" placeholder="Ask medical or rescue question..." autocomplete="off">
+      <button type="submit" class="btn btn-secondary" style="min-height: 38px; padding: 0 14px; font-size: 0.85rem;">Send</button>
+    </form>
+  </div>
+
+  <!-- =====================================================================
+       15. REPORT EMERGENCY & VOICE RECOGNITION MODAL
+       ================================------------------------------------- -->
+  <div id="incident-report-modal" class="modal-backdrop">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="color: #fff; font-size: 1.3rem; font-weight: 800;">🚨 Report Ground Incident</h3>
+        <button onclick="closeIncidentReportModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer;">✕</button>
+      </div>
+
+      <div style="background: rgba(0, 240, 255, 0.08); border: 1px dashed var(--cyan-neon); padding: 14px; border-radius: var(--radius-sm); margin-bottom: 20px; text-align: center;">
+        <button id="voice-record-btn" class="btn btn-secondary" style="font-size: 0.85rem; width: 100%; margin-bottom: 6px;">
+          🎙 Speak Emergency (Voice Recognition)
+        </button>
+        <span id="voice-status-indicator" style="font-size: 0.75rem; color: var(--text-muted);">
+          Tap button and speak. AI will transcribe and auto-populate fields.
+        </span>
+      </div>
+
+      <form id="incident-report-form">
+        <div class="form-group">
+          <label for="report-type">Disaster / Incident Category</label>
+          <select id="report-type" class="form-control">
+            <option value="Flood">🌊 Flash Flood / Water Inundation</option>
+            <option value="Fire">🔥 Urban Fire / Chemical Hazard</option>
+            <option value="Accident">💥 Structural Collapse / Road Accident</option>
+            <option value="Medical">🚑 Trapped Person / Medical Emergency</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="report-location">Location / Sector Landmark</label>
+          <input type="text" id="report-location" class="form-control" placeholder="e.g. Near 4th Street Metro Bridge" required>
+        </div>
+
+        <div class="form-group">
+          <label for="report-details">Incident Details &amp; Trapped Persons</label>
+          <textarea id="report-details" class="form-control" rows="3" placeholder="Describe depth, number of persons, medical urgency..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-outline" style="flex: 1;" onclick="closeIncidentReportModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Broadcast Report</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Leaflet JavaScript library -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- =====================================================================
+       16. EMBEDDED JAVASCRIPT: SIMULATED AI, LEAFLET GIS, AUDIO & SENSORS
+       ================================------------------------------------- -->
+  <script>
+    /* -------------------------------------------------------------
+       GLOBAL STATE & CONFIGURATION
+       ------------------------------------------------------------- */
+    const ResQState = {
+      emergencyMode: false,
+      largeTextMode: false,
+      offlineSimulated: false,
+      priorityRescueActive: true,
+      currentLanguage: 'en',
+      dangerExpansionPaused: false,
+      floodCircleRadius: 750, // Meters
+      userLocation: { lat: 28.6139, lng: 77.2090 }, // Default Delhi Center for realism
+      mapInstance: null,
+      mapLayers: {},
+      audioContext: null
+    };
+
+    /* -------------------------------------------------------------
+       AUDIO SYNTHESIZER (WEB AUDIO API - NO EXTERNAL ASSETS NEEDED)
+       ------------------------------------------------------------- */
+    function playSynthesizedTone(type = 'alarm') {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!ResQState.audioContext) ResQState.audioContext = new AudioCtx();
+        if (ResQState.audioContext.state === 'suspended') ResQState.audioContext.resume();
+
+        const osc = ResQState.audioContext.createOscillator();
+        const gain = ResQState.audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(ResQState.audioContext.destination);
+
+        if (type === 'alarm') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(800, ResQState.audioContext.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(400, ResQState.audioContext.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.3, ResQState.audioContext.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ResQState.audioContext.currentTime + 0.35);
+          osc.start();
+          osc.stop(ResQState.audioContext.currentTime + 0.35);
+        } else if (type === 'beep') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, ResQState.audioContext.currentTime);
+          gain.gain.setValueAtTime(0.2, ResQState.audioContext.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ResQState.audioContext.currentTime + 0.15);
+          osc.start();
+          osc.stop(ResQState.audioContext.currentTime + 0.15);
+        }
+      } catch (e) {
+        console.warn("Web Audio not permitted or supported:", e);
+      }
+    }
+
+    /* -------------------------------------------------------------
+       TEXT-TO-SPEECH (WEB SPEECH API SYNTHESIS)
+       ------------------------------------------------------------- */
+    function speakText(text, lang = 'en-US') {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert("Text-to-Speech not supported on this browser: " + text);
+      }
+    }
+
+    /* -------------------------------------------------------------
+       1. INITIALIZE LEAFLET MAP & TACTICAL LAYERS
+       ------------------------------------------------------------- */
+    function initTacticalMap() {
+      const centerCoords = [28.6139, 77.2090];
+      
+      // Mapbox public access token
+      const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1Ijoic25laGFwYWxoYWRlIiwiYSI6ImNtdXFtd2t2ZzBkOXUyeHNteWliY2kzeXkifQ.Uyriv45js2qMl9IdzzhUYQ';
+
+      ResQState.mapInstance = L.map('leaflet-map', {
+        zoomControl: true,
+        attributionControl: true
+      }).setView(centerCoords, 14);
+
+      // Mapbox Dark basemap
+      L.tileLayer(
+        'https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/512/{z}/{x}/{y}?access_token=' + MAPBOX_ACCESS_TOKEN,
+        {
+          maxZoom: 22,
+          tileSize: 512,
+          zoomOffset: -1,
+          attribution: '&copy; <a href="https://www.mapbox.com/about/maps/" target="_blank" rel="noopener">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+        }
+      ).addTo(ResQState.mapInstance);
+
+      // Initialize Layer Groups
+      ResQState.mapLayers.floods = L.layerGroup().addTo(ResQState.mapInstance);
+      ResQState.mapLayers.fires = L.layerGroup().addTo(ResQState.mapInstance);
+      ResQState.mapLayers.accidents = L.layerGroup().addTo(ResQState.mapInstance);
+      ResQState.mapLayers.routes = L.layerGroup().addTo(ResQState.mapInstance);
+      ResQState.mapLayers.shelters = L.layerGroup().addTo(ResQState.mapInstance);
+      ResQState.mapLayers.priority = L.layerGroup().addTo(ResQState.mapInstance);
+      ResQState.mapLayers.drones = L.layerGroup().addTo(ResQState.mapInstance);
+
+      function createPulsingMarker(className, label) {
+        return L.divIcon({
+          className: 'custom-div-icon',
+          html: `<div class="leaflet-pulsing-icon ${className}" style="width: 32px; height: 32px;">${label}</div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16]
+        });
+      }
+
+      // Add Expanding Flood Zone Circle
+      ResQState.floodCircle = L.circle([28.6185, 77.2150], {
+        color: '#00f0ff',
+        fillColor: '#0077ff',
+        fillOpacity: 0.35,
+        radius: ResQState.floodCircleRadius,
+        weight: 2
+      }).addTo(ResQState.mapLayers.floods);
+
+      ResQState.floodCircle.bindPopup("<b>🌊 Sector 7 Flood Epicenter</b><br>Depth: 1.8m<br>Predicted Expansion: +5m/min");
+
+      // Add Fire Incident
+      L.marker([28.6080, 77.2010], { icon: createPulsingMarker('marker-fire', '🔥') })
+        .addTo(ResQState.mapLayers.fires)
+        .bindPopup("<b>🔥 Chemical Storage Fire</b><br>Hazard Radius: 1.8 km<br>Teams En Route: Hazmat 12");
+
+      // Add Structural Collapse Incident
+      L.marker([28.6210, 77.2025], { icon: createPulsingMarker('marker-accident', '💥') })
+        .addTo(ResQState.mapLayers.accidents)
+        .bindPopup("<b>💥 Bridge Overpass Structural Damage</b><br>Highway Flyover 9 blocked.<br>Use Green Detour.");
+
+      // Add Relief Shelters
+      L.marker([28.6280, 77.2180], { icon: createPulsingMarker('marker-shelter', '🏠') })
+        .addTo(ResQState.mapLayers.shelters)
+        .bindPopup("<b>🏠 Central Indoor Stadium Shelter</b><br>Capacity: 85% Full<br>Medical Station Online");
+
+      L.marker([28.6040, 77.2220], { icon: createPulsingMarker('marker-shelter', '🏠') })
+        .addTo(ResQState.mapLayers.shelters)
+        .bindPopup("<b>🏠 North Hill High School Shelter</b><br>Capacity: 40% Full<br>Food Rations: 5 Days");
+
+      // Priority Demographic Sites
+      L.marker([28.6145, 77.2215], { icon: createPulsingMarker('marker-priority', '👵') })
+        .addTo(ResQState.mapLayers.priority)
+        .bindPopup("<b>👵 Evergreen Senior Home</b><br>Priority Tier 1<br>42 Residents awaiting boat transfer");
+
+      L.marker([28.6110, 77.2120], { icon: createPulsingMarker('marker-priority', '🏥') })
+        .addTo(ResQState.mapLayers.priority)
+        .bindPopup("<b>🏥 St. Jude Children's Hospital</b><br>Priority Tier 1<br>Critical Pediatric Ward");
+
+      // Evacuation Routes: Green Safe vs Red Danger
+      const safeEvacRouteCoords = [
+        [28.6145, 77.2090],
+        [28.6190, 77.2085],
+        [28.6230, 77.2110],
+        [28.6280, 77.2180]
+      ];
+      L.polyline(safeEvacRouteCoords, {
+        color: '#00ff88',
+        weight: 6,
+        opacity: 0.85,
+        dashArray: '10, 8'
+      }).addTo(ResQState.mapLayers.routes).bindPopup("<b>🟢 Recommended Safe Evacuation Route Alpha</b><br>Clear of all floodwaters.");
+
+      const dangerBlockedRouteCoords = [
+        [28.6145, 77.2090],
+        [28.6160, 77.2130],
+        [28.6185, 77.2150]
+      ];
+      L.polyline(dangerBlockedRouteCoords, {
+        color: '#ff2a5f',
+        weight: 5,
+        opacity: 0.75,
+        dashArray: '5, 5'
+      }).addTo(ResQState.mapLayers.routes).bindPopup("<b>🔴 Submerged Danger Route</b><br>DO NOT USE. 1.8m deep floodwater.");
+
+      // Autonomous Drone Recon Path Marker
+      ResQState.droneMarker = L.marker([28.6170, 77.2110], { icon: createPulsingMarker('marker-drone', '🚁') })
+        .addTo(ResQState.mapLayers.drones)
+        .bindPopup("<b>🚁 SkyScout Alpha-01</b><br>Thermal Search Grid Active<br>Target Coordinates Transmitted");
+
+      // Rescue Vehicles: SAR Boat
+      ResQState.boatMarker = L.marker([28.6165, 77.2140], { icon: createPulsingMarker('marker-shelter', '🚤') })
+        .addTo(ResQState.mapInstance)
+        .bindPopup("<b>🚤 Unit SAR Boat Alpha-1</b><br>ETA: 4 min<br>Speed: 24 km/h");
+
+      // Animate Danger Zone Expansion slowly
+      setInterval(() => {
+        if (!ResQState.dangerExpansionPaused && ResQState.floodCircle) {
+          ResQState.floodCircleRadius += 4;
+          if (ResQState.floodCircleRadius > 1400) ResQState.floodCircleRadius = 700;
+          ResQState.floodCircle.setRadius(ResQState.floodCircleRadius);
+        }
+      }, 2000);
+    }
+
+    /* -------------------------------------------------------------
+       2. HERO SENSOR RADAR CANVAS ANIMATION
+       ------------------------------------------------------------- */
+    function initHeroRadarCanvas() {
+      const canvas = document.getElementById('hero-radar-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let angle = 0;
+      function resize() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = 340;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const blips = [
+        { x: 0.35, y: 0.4, label: "Flood Zone 7", color: '#ff2a5f' },
+        { x: 0.65, y: 0.3, label: "Chemical Plant", color: '#ffaa00' },
+        { x: 0.5, y: 0.65, label: "SAR Unit 04", color: '#00ff88' },
+        { x: 0.75, y: 0.55, label: "Drone Alpha", color: '#00f0ff' }
+      ];
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = Math.min(centerX, centerY) - 20;
+
+        ctx.strokeStyle = 'rgba(0, 240, 255, 0.18)';
+        ctx.lineWidth = 1;
+        for (let r = 1; r <= 4; r++) {
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, (radius / 4) * r, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(centerX - radius, centerY);
+        ctx.lineTo(centerX + radius, centerY);
+        ctx.moveTo(centerX, centerY - radius);
+        ctx.lineTo(centerX, centerY + radius);
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(angle);
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+        gradient.addColorStop(0, 'rgba(0, 240, 255, 0)');
+        gradient.addColorStop(1, 'rgba(0, 240, 255, 0.25)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius, 0, Math.PI / 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        blips.forEach(blip => {
+          const bx = centerX + (blip.x - 0.5) * radius * 1.6;
+          const by = centerY + (blip.y - 0.5) * radius * 1.6;
+          ctx.fillStyle = blip.color;
+          ctx.beginPath();
+          ctx.arc(bx, by, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+          ctx.font = '10px monospace';
+          ctx.fillText(blip.label, bx + 8, by + 3);
+        });
+
+        angle += 0.025;
+        requestAnimationFrame(render);
+      }
+      render();
+    }
+
+    /* -------------------------------------------------------------
+       3. SENSOR TELEMETRY REAL-TIME GRAPH CANVAS
+       ------------------------------------------------------------- */
+    function initSensorGraph() {
+      const canvas = document.getElementById('sensor-graph-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width = canvas.parentElement.clientWidth - 48;
+        canvas.height = 220;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const points = 40;
+      let tick = 0;
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const w = canvas.width;
+        const h = canvas.height;
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+          const y = (h / 4) * i;
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(w, y);
+          ctx.stroke();
+        }
+
+        // Draw Water Level Line (Cyan)
+        ctx.strokeStyle = '#00f0ff';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        for (let i = 0; i < points; i++) {
+          const x = (w / (points - 1)) * i;
+          const wave = Math.sin((i + tick) * 0.15) * 35 + Math.cos((i + tick) * 0.08) * 15;
+          const y = h * 0.45 + wave;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Draw Rainfall Line (Red)
+        ctx.strokeStyle = '#ff2a5f';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < points; i++) {
+          const x = (w / (points - 1)) * i;
+          const wave = Math.cos((i * 1.5 + tick) * 0.2) * 25 + Math.sin(tick * 0.1) * 10;
+          const y = h * 0.65 + wave;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        tick += 0.4;
+        requestAnimationFrame(render);
+      }
+      render();
+    }
+
+    /* -------------------------------------------------------------
+       4. ADMIN POWER BI STYLE CHARTS (DONUT & VELOCITY BARS)
+       ------------------------------------------------------------- */
+    function initAdminCharts() {
+      const donutCanvas = document.getElementById('category-donut-canvas');
+      if (donutCanvas) {
+        const ctx = donutCanvas.getContext('2d');
+        donutCanvas.width = donutCanvas.parentElement.clientWidth - 48;
+        donutCanvas.height = 240;
+
+        const data = [
+          { val: 50, color: '#0077ff', label: 'Flood' },
+          { val: 25, color: '#ff5500', label: 'Wildfire' },
+          { val: 15, color: '#ff0055', label: 'Structure' },
+          { val: 10, color: '#00ff88', label: 'Medical' }
+        ];
+
+        let total = 100;
+        let startAngle = 0;
+        const cx = donutCanvas.width / 2;
+        const cy = donutCanvas.height / 2;
+        const radius = 75;
+
+        data.forEach(slice => {
+          const sliceAngle = (slice.val / total) * Math.PI * 2;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle);
+          ctx.arc(cx, cy, radius - 30, startAngle + sliceAngle, startAngle, true);
+          ctx.closePath();
+          ctx.fillStyle = slice.color;
+          ctx.fill();
+          startAngle += sliceAngle;
+        });
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText("12 Active", cx, cy);
+      }
+
+      const barCanvas = document.getElementById('velocity-bar-canvas');
+      if (barCanvas) {
+        const ctx = barCanvas.getContext('2d');
+        barCanvas.width = barCanvas.parentElement.clientWidth - 48;
+        barCanvas.height = 240;
+
+        const hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00'];
+        const values = [12, 28, 45, 62, 85, 110];
+        const maxVal = 120;
+
+        const bw = 32;
+        const gap = (barCanvas.width - (bw * hours.length)) / (hours.length + 1);
+
+        hours.forEach((h, i) => {
+          const x = gap + i * (bw + gap);
+          const barHeight = (values[i] / maxVal) * 160;
+          const y = barCanvas.height - barHeight - 30;
+
+          ctx.fillStyle = '#00f0ff';
+          ctx.fillRect(x, y, bw, barHeight);
+
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(h, x + bw / 2, barCanvas.height - 10);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(values[i], x + bw / 2, y - 6);
+        });
+      }
+    }
+
+    /* -------------------------------------------------------------
+       5. DRONE THERMAL RECON CANVAS SIMULATOR
+       ------------------------------------------------------------- */
+    function initDroneThermalCanvas() {
+      const canvas = document.getElementById('drone-thermal-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = 280;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      let offset = 0;
+      function render() {
+        ctx.fillStyle = '#050a14';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = 'rgba(0, 240, 255, 0.04)';
+        for (let i = 0; i < canvas.height; i += 4) {
+          ctx.fillRect(0, i, canvas.width, 1);
+        }
+
+        const hotSpots = [
+          { x: canvas.width * 0.45, y: canvas.height * 0.48, rad: 22, temp: '36.8°C' },
+          { x: canvas.width * 0.54, y: canvas.height * 0.52, rad: 18, temp: '37.1°C' }
+        ];
+
+        hotSpots.forEach(spot => {
+          const grad = ctx.createRadialGradient(spot.x, spot.y, 2, spot.x, spot.y, spot.rad);
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.3, '#ff0055');
+          grad.addColorStop(0.7, '#ffaa00');
+          grad.addColorStop(1, 'transparent');
+
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(spot.x, spot.y, spot.rad, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = '#00ff88';
+          ctx.strokeRect(spot.x - spot.rad - 4, spot.y - spot.rad - 4, (spot.rad + 4) * 2, (spot.rad + 4) * 2);
+          ctx.fillStyle = '#00ff88';
+          ctx.font = '10px monospace';
+          ctx.fillText(`HUMAN ${spot.temp}`, spot.x - spot.rad, spot.y + spot.rad + 14);
+        });
+
+        offset += 0.5;
+        requestAnimationFrame(render);
+      }
+      render();
+    }
+
+    /* -------------------------------------------------------------
+       6. SOS COUNTDOWN & ABORT ENGINE
+       ------------------------------------------------------------- */
+    let sosTimer = null;
+    let sosSecondsLeft = 5;
+
+    function startSOSSequence() {
+      const modal = document.getElementById('sos-modal-overlay');
+      const numDisplay = document.getElementById('countdown-number');
+      const circleProgress = document.getElementById('countdown-circle');
+      const statusFeedback = document.getElementById('sos-status-feedback');
+      const silent = document.getElementById('silent-sos-check').checked;
+
+      sosSecondsLeft = 5;
+      numDisplay.textContent = sosSecondsLeft;
+      circleProgress.style.strokeDashoffset = '0';
+      statusFeedback.style.display = 'none';
+      modal.style.display = 'flex';
+
+      if (!silent) playSynthesizedTone('alarm');
+
+      if (sosTimer) clearInterval(sosTimer);
+      sosTimer = setInterval(() => {
+        sosSecondsLeft--;
+        numDisplay.textContent = sosSecondsLeft;
+        
+        const offset = 377 - ((5 - sosSecondsLeft) / 5) * 377;
+        circleProgress.style.strokeDashoffset = offset;
+
+        if (!silent) playSynthesizedTone('beep');
+
+        if (sosSecondsLeft <= 0) {
+          clearInterval(sosTimer);
+          triggerDistressBroadcast();
+        }
+      }, 1000);
+    }
+
+    function cancelSOSSequence() {
+      if (sosTimer) clearInterval(sosTimer);
+      document.getElementById('sos-modal-overlay').style.display = 'none';
+    }
+
+    function triggerDistressBroadcast() {
+      const statusFeedback = document.getElementById('sos-status-feedback');
+      statusFeedback.style.display = 'block';
+      statusFeedback.innerHTML = `
+        <strong>✓ DISTRESS BEACON BROADCASTED!</strong><br>
+        GPS Telemetry: Lat 28.6139, Lon 77.2090 (Accuracy: ±3m)<br>
+        Assigned: Unit SAR Boat Alpha-1 • ETA 4 Minutes.<br>
+        Stay on highest roof or elevated ground.
+      `;
+      playSynthesizedTone('alarm');
+      speakText("Emergency SOS transmitted. Rescue teams dispatched to your coordinates.");
+    }
+
+    /* -------------------------------------------------------------
+       7. AI FIRST-AID CHATBOT ("ResQ-Bot") ENGINE
+       ------------------------------------------------------------- */
+    const triageLibrary = {
+      cpr: `<strong>🫀 CPR (Adult Life Support):</strong><br>
+        1. Place hands interlocked in center of chest.<br>
+        2. Push hard & fast (100–120 beats/min to the beat of 'Stayin' Alive').<br>
+        3. Compress 2 inches deep.<br>
+        4. Give 30 compressions followed by 2 gentle rescue breaths.<br>
+        5. Continue until paramedics arrive.`,
+      bleeding: `<strong>🩸 Severe Bleeding Control:</strong><br>
+        1. Apply firm, direct pressure with clean cloth or sterile gauze.<br>
+        2. Do NOT remove soaked cloth; add more layers on top.<br>
+        3. Elevate injured limb above heart level.<br>
+        4. If bleeding does not stop and limb is severed, apply a tourniquet 2 inches above the wound.`,
+      flood: `<strong>🌊 Trapped in Flash Flood:</strong><br>
+        1. Move immediately to top floor or roof. DO NOT hide in closed attics without roof exit.<br>
+        2. Switch off main electrical breaker if safe to do so.<br>
+        3. Never attempt to drive or swim through moving floodwaters (6 inches can knock an adult).<br>
+        4. Signal rescuers using a bright cloth or flashlight.`,
+      burns: `<strong>🔥 Burn First Aid:</strong><br>
+        1. Cool the burn under gentle running tap water for 10–20 minutes.<br>
+        2. Do NOT apply ice, butter, or toothpaste.<br>
+        3. Cover loosely with clean, non-stick plastic wrap or sterile dressing.<br>
+        4. Keep victim warm to prevent hypothermia.`,
+      fracture: `<strong>🦴 Suspected Bone Fracture:</strong><br>
+        1. Keep injured limb immobilized in the position found.<br>
+        2. Support limb with a makeshift splint (rolled cardboard/umbrella padded with cloth).<br>
+        3. Apply cold compress wrapped in cloth to reduce swelling.<br>
+        4. Do NOT attempt to straighten crooked bones.`
+    };
+
+    function appendChatMessage(sender, text) {
+      const container = document.getElementById('chat-messages-container');
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${sender}`;
+      bubble.innerHTML = text;
+      container.appendChild(bubble);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function handleQuickReply(type) {
+      if (triageLibrary[type]) {
+        appendChatMessage('user', `How do I handle ${type.toUpperCase()}?`);
+        setTimeout(() => {
+          appendChatMessage('bot', triageLibrary[type]);
+          playSynthesizedTone('beep');
+        }, 300);
+      }
+    }
+
+    function handleChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-text-input');
+      const val = input.value.trim().toLowerCase();
+      if (!val) return;
+
+      appendChatMessage('user', input.value);
+      input.value = '';
+
+      setTimeout(() => {
+        let matched = false;
+        for (const key in triageLibrary) {
+          if (val.includes(key)) {
+            appendChatMessage('bot', triageLibrary[key]);
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          appendChatMessage('bot', `
+            <strong>Medical Triage Assessment:</strong><br>
+            Please stay calm. Keep the patient stationary, check for breathing and responsiveness. If bleeding, apply direct pressure. A specialized paramedic team has been prioritized.
+          `);
+        }
+        playSynthesizedTone('beep');
+      }, 400);
+    }
+
+    /* -------------------------------------------------------------
+       8. VOICE EMERGENCY REPORTING (WEB SPEECH API RECOGNITION)
+       ------------------------------------------------------------- */
+    function initVoiceReporting() {
+      const voiceBtn = document.getElementById('voice-record-btn');
+      const statusInd = document.getElementById('voice-status-indicator');
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        statusInd.textContent = "Web Speech API not natively supported; simulated voice demo enabled.";
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'en-US';
+
+      voiceBtn.addEventListener('click', () => {
+        try {
+          recognition.start();
+          statusInd.textContent = "🎙 Listening... Speak clearly (e.g. 'Flood trapped 4 people near Metro Station')";
+          statusInd.style.color = '#00f0ff';
+        } catch (e) {
+          console.warn("Recognition already active", e);
+        }
+      });
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        statusInd.textContent = `Recognized: "${transcript}"`;
+        statusInd.style.color = '#00ff88';
+
+        document.getElementById('report-details').value = transcript;
+        const lower = transcript.toLowerCase();
+        if (lower.includes('fire')) document.getElementById('report-type').value = 'Fire';
+        else if (lower.includes('flood') || lower.includes('water')) document.getElementById('report-type').value = 'Flood';
+        else if (lower.includes('accident') || lower.includes('collapse')) document.getElementById('report-type').value = 'Accident';
+        else document.getElementById('report-type').value = 'Medical';
+
+        document.getElementById('report-location').value = "Transcribed Landmark (Detected from Voice)";
+      };
+
+      recognition.onerror = () => {
+        statusInd.textContent = "Microphone error or permission denied. Type details manually.";
+      };
+    }
+
+    /* -------------------------------------------------------------
+       9. SIMULATOR LOGIC (WHAT-IF & TIME MACHINE)
+       ------------------------------------------------------------- */
+    function initSimulators() {
+      const sRain = document.getElementById('slider-rain');
+      const sWind = document.getElementById('slider-wind');
+      const sPop = document.getElementById('slider-pop');
+
+      function updateWhatIf() {
+        const rain = parseInt(sRain.value);
+        const wind = parseInt(sWind.value);
+        const pop = parseInt(sPop.value);
+
+        document.getElementById('val-rain').textContent = `${rain} mm/h`;
+        document.getElementById('val-wind').textContent = `${wind} km/h`;
+        document.getElementById('val-pop').textContent = `${pop.toLocaleString()} /km²`;
+
+        const index = Math.min(100, Math.round((rain * 0.4) + (wind * 0.3) + (pop / 300)));
+        const radius = (1.0 + (rain / 70)).toFixed(1);
+        const evacTime = Math.max(15, Math.round(90 - (rain * 0.25)));
+
+        document.getElementById('sim-danger-index').textContent = `${index} / 100`;
+        document.getElementById('sim-flood-radius').textContent = `${radius} km`;
+        document.getElementById('sim-evac-time').textContent = `${evacTime} min`;
+
+        if (ResQState.floodCircle) {
+          ResQState.floodCircle.setRadius(parseFloat(radius) * 600);
+        }
+      }
+
+      sRain.addEventListener('input', updateWhatIf);
+      sWind.addEventListener('input', updateWhatIf);
+      sPop.addEventListener('input', updateWhatIf);
+
+      const timeSlider = document.getElementById('slider-time-machine');
+      const timeLabel = document.getElementById('time-machine-label');
+      const timeNarrative = document.getElementById('time-machine-narrative');
+
+      const narrativeStages = {
+        "-2": "<strong>T - 02:00:</strong> Reservoir spillway breaches initial warning mark. Soil saturation exceeds 92%. First advisory dispatched to riverfront properties.",
+        "-1": "<strong>T - 01:00:</strong> Drainage sluices overwhelmed in Sector 7. Police initiate voluntary evacuation along Lowland Avenue.",
+        "0": "<strong>T + 00:00 (NOW):</strong> Current flood reaches 1.2m depth. 28 SAR units deployed across Sector 7. Green Route Alpha remains unobstructed for civilian evacuation.",
+        "1": "<strong>T + 01:00 (PREDICTED):</strong> Flood crests at 1.8m. Overpass 4 completely blocked. All priority healthcare facilities fully transferred to highlands.",
+        "2": "<strong>T + 02:00 (PREDICTED):</strong> Water levels plateau. Drone thermal sweeps transition to localized structural survey and food drops.",
+        "3": "<strong>T + 03:00 (PREDICTED):</strong> Receding flood trend begins as backup drainage pumps activate. Evacuation complete."
+      };
+
+      timeSlider.addEventListener('input', () => {
+        const val = timeSlider.value;
+        timeLabel.textContent = `T ${val >= 0 ? '+' : ''}${val}:00 HRS`;
+        timeNarrative.innerHTML = narrativeStages[val] || narrativeStages["0"];
+
+        if (ResQState.floodCircle) {
+          const simulatedRad = 500 + (parseInt(val) + 2) * 220;
+          ResQState.floodCircle.setRadius(simulatedRad);
+        }
+      });
+    }
+
+    /* -------------------------------------------------------------
+       10. EVENT HANDLERS & USER INTERACTIONS
+       ------------------------------------------------------------- */
+    function setupInteractions() {
+      // Emergency Mode Toggle
+      document.getElementById('emergency-mode-toggle').addEventListener('click', function() {
+        ResQState.emergencyMode = !ResQState.emergencyMode;
+        document.body.classList.toggle('emergency-mode', ResQState.emergencyMode);
+        this.classList.toggle('active', ResQState.emergencyMode);
+        this.setAttribute('aria-pressed', ResQState.emergencyMode);
+        playSynthesizedTone('beep');
+      });
+
+      // Large Text Toggle
+      document.getElementById('large-text-toggle').addEventListener('click', function() {
+        ResQState.largeTextMode = !ResQState.largeTextMode;
+        document.body.classList.toggle('large-text-mode', ResQState.largeTextMode);
+        this.classList.toggle('active', ResQState.largeTextMode);
+      });
+
+      // Offline Simulation Toggle
+      document.getElementById('offline-sim-toggle').addEventListener('click', function() {
+        ResQState.offlineSimulated = !ResQState.offlineSimulated;
+        const banner = document.getElementById('offline-banner');
+        banner.style.display = ResQState.offlineSimulated ? 'block' : 'none';
+        this.classList.toggle('active', ResQState.offlineSimulated);
+        playSynthesizedTone('beep');
+      });
+
+      // SOS Trigger & Buttons
+      document.getElementById('sos-trigger-btn').addEventListener('click', startSOSSequence);
+      document.getElementById('cancel-sos-btn').addEventListener('click', cancelSOSSequence);
+      document.getElementById('instant-sos-btn').addEventListener('click', () => {
+        if (sosTimer) clearInterval(sosTimer);
+        triggerDistressBroadcast();
+      });
+
+      // Chatbot Fab & Drawer
+      const chatFab = document.getElementById('chatbot-fab');
+      const chatDrawer = document.getElementById('chatbot-drawer');
+      chatFab.addEventListener('click', () => {
+        chatDrawer.style.display = chatDrawer.style.display === 'flex' ? 'none' : 'flex';
+      });
+      document.getElementById('close-chat-btn').addEventListener('click', () => {
+        chatDrawer.style.display = 'none';
+      });
+      document.getElementById('chat-input-form').addEventListener('submit', handleChatSubmit);
+
+      // Hero Buttons
+      document.getElementById('hero-report-btn').addEventListener('click', openIncidentReportModal);
+      document.getElementById('voice-report-quick-btn').addEventListener('click', openIncidentReportModal);
+
+      // Map Layer Toggles
+      document.querySelectorAll('.layer-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const layerKey = this.getAttribute('data-layer');
+          if (ResQState.mapLayers[layerKey]) {
+            if (ResQState.mapInstance.hasLayer(ResQState.mapLayers[layerKey])) {
+              ResQState.mapInstance.removeLayer(ResQState.mapLayers[layerKey]);
+              this.classList.remove('active');
+            } else {
+              ResQState.mapInstance.addLayer(ResQState.mapLayers[layerKey]);
+              this.classList.add('active');
+            }
+          }
+        });
+      });
+
+      // Locate User Button
+      document.getElementById('user-locate-btn').addEventListener('click', () => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(pos => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            ResQState.mapInstance.setView([lat, lng], 15);
+            L.circleMarker([lat, lng], { color: '#00ff88', radius: 8 }).addTo(ResQState.mapInstance).bindPopup("<b>Your Verified Location</b>").openPopup();
+          }, () => {
+            ResQState.mapInstance.setView([28.6139, 77.2090], 15);
+            alert("Using simulated GPS location in Sector 7.");
+          });
+        }
+      });
+
+      // Danger Expansion Pause
+      document.getElementById('toggle-expansion-btn').addEventListener('click', function() {
+        ResQState.dangerExpansionPaused = !ResQState.dangerExpansionPaused;
+        this.textContent = ResQState.dangerExpansionPaused ? '▶ Resume Danger Zone Expansion' : '⏸ Pause Danger Zone Expansion';
+      });
+
+      // Priority Mode Toggle
+      document.getElementById('priority-mode-toggle').addEventListener('click', function() {
+        ResQState.priorityRescueActive = !ResQState.priorityRescueActive;
+        this.textContent = ResQState.priorityRescueActive ? 'Disable Priority Override' : 'Enable Priority Mode';
+        playSynthesizedTone('beep');
+      });
+
+      // Language Switcher
+      const enBtn = document.getElementById('lang-en-btn');
+      const hiBtn = document.getElementById('lang-hi-btn');
+      enBtn.addEventListener('click', () => switchLanguage('en'));
+      hiBtn.addEventListener('click', () => switchLanguage('hi'));
+
+      // Text-To-Speech Buttons on alerts
+      document.querySelectorAll('.tts-speak-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const card = this.closest('.phone-alert-card');
+          const body = card.querySelector('.alert-text-body').textContent;
+          speakText(body, ResQState.currentLanguage === 'hi' ? 'hi-IN' : 'en-US');
+        });
+      });
+
+      // Family Safety Check-In
+      document.getElementById('mark-safe-btn').addEventListener('click', function() {
+        const list = document.getElementById('family-status-list');
+        const newItem = document.createElement('div');
+        newItem.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: rgba(0,255,136,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid #00ff88;";
+        newItem.innerHTML = `
+          <div>
+            <strong style="font-size: 0.85rem; color: #fff;">You (Current Device)</strong>
+            <div style="font-size: 0.7rem; color: #a5f3fc;">Marked Safe just now • Coords Shared</div>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--green-safe); font-weight: 800;">🟢 VERIFIED SAFE</span>
+        `;
+        list.prepend(newItem);
+        this.disabled = true;
+        this.textContent = "✓ Status Logged";
+        playSynthesizedTone('beep');
+      });
+
+      // Incident Report Form Submission
+      document.getElementById('incident-report-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const type = document.getElementById('report-type').value;
+        const loc = document.getElementById('report-location').value;
+        alert(`Emergency report broadcasted for ${type} at ${loc}. Nearby SAR units notified.`);
+        closeIncidentReportModal();
+      });
+
+      // Live UTC clock
+      setInterval(() => {
+        const now = new Date();
+        document.getElementById('live-clock').textContent = now.toTimeString().split(' ')[0] + ' UTC';
+      }, 1000);
+    }
+
+    /* -------------------------------------------------------------
+       11. HELPER ROUTINES & SIMULATION TRIGGERS
+       ------------------------------------------------------------- */
+    function switchLanguage(lang) {
+      ResQState.currentLanguage = lang;
+      document.getElementById('lang-en-btn').classList.toggle('active', lang === 'en');
+      document.getElementById('lang-hi-btn').classList.toggle('active', lang === 'hi');
+
+      document.querySelectorAll('.phone-alert-card').forEach(card => {
+        const textElem = card.querySelector('.alert-text-body');
+        textElem.textContent = card.getAttribute(`data-lang-${lang}`);
+      });
+    }
+
+    function openIncidentReportModal() {
+      document.getElementById('incident-report-modal').style.display = 'flex';
+    }
+    function closeIncidentReportModal() {
+      document.getElementById('incident-report-modal').style.display = 'none';
+    }
+
+    function trackUnitOnMap(unit) {
+      if (unit === 'boat' && ResQState.boatMarker) {
+        ResQState.mapInstance.setView(ResQState.boatMarker.getLatLng(), 16);
+        ResQState.boatMarker.openPopup();
+      }
+    }
+
+    function triggerDronePing() {
+      playSynthesizedTone('beep');
+      alert("SkyScout Drone Alpha transmitted coordinates (28.6142, 77.2088) to Unit SAR Boat Alpha-1. Rescue path queued.");
+    }
+
+    function simulateMeshPacketSend() {
+      const log = document.getElementById('mesh-packet-log');
+      log.innerHTML += `<br>[TX] Broadcasting SOS packet across Bluetooth Low Energy...`;
+      setTimeout(() => {
+        log.innerHTML += `<br>[HOP 1] Relayed by Citizen Node #14 (RSSI: -64dBm)`;
+        log.scrollTop = log.scrollHeight;
+      }, 600);
+      setTimeout(() => {
+        log.innerHTML += `<br>[HOP 2] Ingested by EOC Satellite Gateway • ACK Received!`;
+        log.scrollTop = log.scrollHeight;
+        playSynthesizedTone('beep');
+      }, 1200);
+    }
+
+    function upvoteReport(btn) {
+      btn.textContent = "👍 Upvoted (45)";
+      btn.disabled = true;
+      playSynthesizedTone('beep');
+    }
+
+    /* -------------------------------------------------------------
+       INITIALIZATION ENTRYPOINT
+       ------------------------------------------------------------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      initTacticalMap();
+      initHeroRadarCanvas();
+      initSensorGraph();
+      initAdminCharts();
+      initDroneThermalCanvas();
+      initSimulators();
+      initVoiceReporting();
+      setupInteractions();
+    });
+  </script>
+</body>
+</html>
